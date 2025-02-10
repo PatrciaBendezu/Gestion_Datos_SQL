@@ -53,8 +53,73 @@ GROUP BY c.Carrera
 ORDER BY Total DESC;
 
 -- 6. Tiempo promedio en días que tarda un prospecto en decidir su inscripción en el año 2024?
-SELECT AVG(DATEDIFF(DAY, i.Fecha_Inscripción, GETDATE())) as DiasPromedio
+SELECT AVG(DATEDIFF(day, i.Fecha_Inscripción, int.Id_Interes)) as PromedioTiempoInscripcion
 FROM G1.INSCRIPCIONES i
-JOIN G1.INTERES int ON i.Id_Interes = int.Id_Interes
+JOIN G1.INTERES int ON i.Id_interes = int.Id_Interes
 JOIN G1.PERIODOS p ON int.Id_Periodo = p.id_periodo
-WHERE p.Periodo IN ('2024-1','2024-2');
+WHERE YEAR(i.Fecha_Inscripción) = 2024;
+
+-- 7. ¿Cuál es la cantidad de inscritos y porcentaje de participacion por edad en el año 2024?
+WITH EdadInscritos AS (
+    SELECT 
+        DATEDIFF(YEAR, p.Fecha_Nacimiento, i.Fecha_Inscripción) as Edad,
+        COUNT(*) as CantidadInscritos,
+        COUNT(*) * 100.0 / SUM(COUNT(*)) OVER() as PorcentajeParticipacion
+    FROM G1.INSCRIPCIONES i
+    JOIN G1.INTERES int ON i.Id_interes = int.Id_Interes
+    JOIN G1.PROSPECTOS p ON int.Id_Prospecto = p.id_Prospecto
+    WHERE YEAR(i.Fecha_Inscripción) = 2024
+    GROUP BY DATEDIFF(YEAR, p.Fecha_Nacimiento, i.Fecha_Inscripción)
+)
+SELECT 
+    Edad,
+    CantidadInscritos,
+    CAST(PorcentajeParticipacion as decimal(5,2)) as PorcentajeParticipacion
+FROM EdadInscritos
+ORDER BY Edad;
+
+-- 8. Cantidad de inscritos y porcentaje de participacion por departamento en los periodos 2024-1, 2024-2 y 2025-1
+WITH InscritosDepartamento AS (
+    SELECT 
+        p.Departamento,
+        pe.Periodo,
+        COUNT(*) as CantidadInscritos,
+        COUNT(*) * 100.0 / SUM(COUNT(*)) OVER(PARTITION BY pe.Periodo) as PorcentajeParticipacion
+    FROM G1.INSCRIPCIONES i
+    JOIN G1.INTERES int ON i.Id_interes = int.Id_Interes
+    JOIN G1.PROSPECTOS p ON int.Id_Prospecto = p.id_Prospecto
+    JOIN G1.PERIODOS pe ON int.Id_Periodo = pe.id_periodo
+    WHERE pe.Periodo IN ('2024-1', '2024-2', '2025-1')
+    GROUP BY p.Departamento, pe.Periodo
+)
+SELECT 
+    Departamento,
+    Periodo,
+    CantidadInscritos,
+    CAST(PorcentajeParticipacion as decimal(5,2)) as PorcentajeParticipacion
+FROM InscritosDepartamento
+ORDER BY Periodo, PorcentajeParticipacion DESC;
+
+-- 9. Cantidad de inscritos y porcentaje de participación por género en el periodo 2024-1
+SELECT 
+    p.Genero,
+    COUNT(*) as CantidadInscritos,
+    CAST(COUNT(*) * 100.0 / SUM(COUNT(*)) OVER() as decimal(5,2)) as PorcentajeParticipacion
+FROM G1.INSCRIPCIONES i
+JOIN G1.INTERES int ON i.Id_interes = int.Id_Interes
+JOIN G1.PROSPECTOS p ON int.Id_Prospecto = p.id_Prospecto
+JOIN G1.PERIODOS pe ON int.Id_Periodo = pe.id_periodo
+WHERE pe.Periodo = '2024-1'
+GROUP BY p.Genero
+ORDER BY CantidadInscritos DESC;
+
+-- 10. Interes que tiene la mayor cantidad de inscritos en el año 2024
+SELECT TOP 3
+    ni.Nivel_Interes,
+    COUNT(*) as CantidadInscritos
+FROM G1.INSCRIPCIONES i
+JOIN G1.INTERES int ON i.Id_interes = int.Id_Interes
+JOIN G1.NIVEL_INTERES ni ON int.Id_Nivel_Interes = ni.id_Nivel_Interes
+WHERE YEAR(i.Fecha_Inscripción) = 2024
+GROUP BY ni.Nivel_Interes
+ORDER BY CantidadInscritos DESC;
