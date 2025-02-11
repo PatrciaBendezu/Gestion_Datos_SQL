@@ -67,7 +67,7 @@ INSERT INTO G1.EVALUACIONES ([Id_Evaluacion], [Id_Inscripcion], [Ingresante], [P
 (50, 50, 'NO', 10, '2024-10-26', CONVERT(DATETIME, '2024-10-26 10:00:00',120), 6);
 
 
-INSERT INTO G1.INSCRIPCIONES ([Id_Inscripcion], [Id_interes], [Fecha_Inscripción], [Hora_Inscripción], [Estado_Inscripción]) VALUES
+INSERT INTO G1.INSCRIPCIONES ([Id_Inscripcion], [Id_interes], [Fecha_Inscripcion], [Hora_Inscripcion], [Estado_Inscripcion]) VALUES
 (1, 4, '2024-08-25', CONVERT(DATETIME, '2024-08-25 12:07:28',120), 'Pendiente'),
 (2, 15, '2023-11-28', CONVERT(DATETIME, '2023-11-28 17:45:11',120), 'Confirmado'),
 (3, 29, '2024-03-05', CONVERT(DATETIME, '2024-03-05 17:46:17',120), 'Confirmado'),
@@ -179,7 +179,7 @@ INSERT INTO G1.MOD_ADMISION (id_Mod_Admision, Mod_Admision) VALUES
 (3, 'Talento');
 
 
-INSERT INTO G1.MOD_ESTUDIOS (id_Mod_Estudio, Mod_Estudio) VALUES
+INSERT INTO G1.MOD_ESTUDIOS (Id_Mod_Estudio, Mod_Estudio) VALUES
 (1, 'Presencial'),
 (2, 'Semipresencial'),
 (3, 'Virtual');

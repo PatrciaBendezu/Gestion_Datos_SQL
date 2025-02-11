@@ -44,9 +44,9 @@ CREATE TABLE G1.INSCRIPCIONES
 (
 	[Id_Inscripcion] [int] NOT NULL,
 	[Id_interes] [int],
-	[Fecha_Inscripción] [date],
-	[Hora_Inscripción] [datetime],
-	[Estado_Inscripción] [varchar](30)
+	[Fecha_Inscripcion] [date],
+	[Hora_Inscripcion] [datetime],
+	[Estado_Inscripcion] [varchar](30)
 )
 
 CREATE TABLE G1.INTERES

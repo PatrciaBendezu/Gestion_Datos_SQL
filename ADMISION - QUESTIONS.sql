@@ -1,84 +1,145 @@
 USE UCDATASCIENCE
 
--- 1. Porcentaje de crecimiento entre periodos espejo (2024-1 y 2025-1)
-WITH Inscritos AS (
-    SELECT p.Periodo, COUNT(*) as Total
-    FROM G1.INTERES i
-    JOIN G1.PERIODOS p ON i.Id_Periodo = p.id_periodo
+-- 1. ¿Cual es el crecimiento interanual de inscripciones entre periodos 2024-1 y 2025-1?
+WITH InscripcionesPeriodo AS (
+    SELECT 
+        p.Periodo,
+        COUNT(i.Id_Inscripcion) as TotalInscripciones
+    FROM G1.INSCRIPCIONES i
+    JOIN G1.INTERES int ON i.Id_interes = int.Id_Interes
+    JOIN G1.PERIODOS p ON int.Id_Periodo = p.id_periodo
     WHERE p.Periodo IN ('2024-1', '2025-1')
     GROUP BY p.Periodo
 )
 SELECT 
-    (CAST((SELECT Total FROM Inscritos WHERE Periodo = '2025-1') AS FLOAT) /
-     CAST((SELECT Total FROM Inscritos WHERE Periodo = '2024-1') AS FLOAT) - 1) * 100 as PorcentajeCrecimiento;
+    (SELECT TotalInscripciones FROM InscripcionesPeriodo WHERE Periodo = '2025-1') as Inscripciones_2025_1,
+    (SELECT TotalInscripciones FROM InscripcionesPeriodo WHERE Periodo = '2024-1') as Inscripciones_2024_1,
+    CAST(
+        ((CAST((SELECT TotalInscripciones FROM InscripcionesPeriodo WHERE Periodo = '2025-1') AS FLOAT) /
+          CAST((SELECT TotalInscripciones FROM InscripcionesPeriodo WHERE Periodo = '2024-1') AS FLOAT)) - 1) * 100 
+        AS DECIMAL(10,2)
+    ) as Crecimiento_Porcentual
 
--- 2. Porcentaje de abandonos antes de completar inscripción en 2024-1
+
+-- 2. ¿Qué porcentaje de prospectos no completan las nscripciones en el periodo 2024-1?
+WITH Estadisticas AS (
+    SELECT 
+        COUNT(DISTINCT p.id_Prospecto) as TotalProspectos,
+        COUNT(DISTINCT i.Id_Inscripcion) as TotalInscripciones
+    FROM G1.PROSPECTOS p
+    JOIN G1.INTERES int ON p.id_Prospecto = int.Id_Prospecto
+    LEFT JOIN G1.INSCRIPCIONES i ON int.Id_Interes = i.Id_interes
+    JOIN G1.PERIODOS per ON int.Id_Periodo = per.id_periodo
+    WHERE per.Periodo = '2024-1'
+)
 SELECT 
-    (COUNT(CASE WHEN i.Id_Estado = 3 THEN 1 END) * 100.0 / COUNT(*)) as PorcentajeAbandono
-FROM G1.INTERES i
-JOIN G1.PERIODOS p ON i.Id_Periodo = p.id_periodo
-WHERE p.Periodo = '2024-1';
+    TotalProspectos,
+    TotalInscripciones,
+    CAST((1 - (CAST(TotalInscripciones AS FLOAT) / CAST(TotalProspectos AS FLOAT))) * 100 AS DECIMAL(10,2)) 
+    as Porcentaje_Sin_Inscripcion
+FROM Estadisticas
 
--- 3. Sede con mayor cantidad de inscritos en 2024
-SELECT TOP 1
+
+-- 3. ¿Cuál es el top 3 de sedes que tiene la mayor cantidad de inscripciones en el año 2024?
+SELECT TOP 3
     s.Sede,
-    COUNT(*) as Total
-FROM G1.INTERES i
-JOIN G1.SEDES s ON i.Id_Sede = s.id_Sede
-JOIN G1.PERIODOS p ON i.Id_Periodo = p.id_periodo
-WHERE p.Periodo in ('2024-1', '2024-2')
-GROUP BY s.Sede
-ORDER BY Total DESC;
-
--- 4. Modalidad de estudios con mayor cantidad de inscritos en 2024
-SELECT TOP 1
-    me.Mod_Estudio,
-    COUNT(*) as Total
-FROM G1.INTERES i
-JOIN G1.MOD_ESTUDIOS me ON i.Id_Mod_Estudio = me.id_Mod_Estudio
-JOIN G1.PERIODOS p ON i.Id_Periodo = p.id_periodo
-WHERE p.Periodo in ('2024-1', '2024-2')
-GROUP BY me.Mod_Estudio
-ORDER BY Total DESC;
-
--- 5. Carrera con mayor cantidad de interesados en 2025-1
-SELECT TOP 1
-    c.Carrera,
-    COUNT(*) as Total
-FROM G1.INTERES i
-JOIN G1.CARRERAS c ON i.Id_Carrera = c.Id_Carrera
-JOIN G1.PERIODOS p ON i.Id_Periodo = p.id_periodo
-WHERE p.Periodo = '2025-1'
-GROUP BY c.Carrera
-ORDER BY Total DESC;
-
--- 6. Tiempo promedio en días que tarda un prospecto en decidir su inscripción en el año 2024?
-SELECT AVG(DATEDIFF(day, i.Fecha_Inscripción, int.Id_Interes)) as PromedioTiempoInscripcion
+    COUNT(i.Id_Inscripcion) as Total_Inscripciones,
+    CAST(COUNT(i.Id_Inscripcion) * 100.0 / 
+        (SELECT COUNT(*) FROM G1.INSCRIPCIONES i2 
+         JOIN G1.INTERES int2 ON i2.Id_interes = int2.Id_Interes
+         JOIN G1.PERIODOS p2 ON int2.Id_Periodo = p2.id_periodo
+         WHERE p2.Periodo LIKE '2024%') AS DECIMAL(10,2)) as Porcentaje
 FROM G1.INSCRIPCIONES i
 JOIN G1.INTERES int ON i.Id_interes = int.Id_Interes
+JOIN G1.SEDES s ON int.Id_Sede = s.id_Sede
 JOIN G1.PERIODOS p ON int.Id_Periodo = p.id_periodo
-WHERE YEAR(i.Fecha_Inscripción) = 2024;
+WHERE p.Periodo LIKE '2024%'
+GROUP BY s.Sede
+ORDER BY Total_Inscripciones DESC
 
--- 7. ¿Cuál es la cantidad de inscritos y porcentaje de participacion por edad en el año 2024?
-WITH EdadInscritos AS (
+
+-- 4. ¿Cuál es la modalidad de estudios que tiene mayor cantidad de inscripciones en el año 2024?
+SELECT TOP 1
+    me.Mod_Estudio,
+    COUNT(i.Id_Inscripcion) as Total_Inscripciones,
+    CAST(COUNT(i.Id_Inscripcion) * 100.0 / 
+        (SELECT COUNT(*) FROM G1.INSCRIPCIONES i2 
+         JOIN G1.INTERES int2 ON i2.Id_interes = int2.Id_Interes
+         JOIN G1.PERIODOS p2 ON int2.Id_Periodo = p2.id_periodo
+         WHERE p2.Periodo LIKE '2024%') AS DECIMAL(10,2)) as Porcentaje
+FROM G1.INSCRIPCIONES i
+JOIN G1.INTERES its ON i.Id_interes = its.Id_Interes
+JOIN G1.MOD_ESTUDIOS me ON its.Id_Mod_Estudio = me.id_Mod_Estudio
+JOIN G1.PERIODOS p ON its.Id_Periodo = p.id_periodo
+WHERE p.Periodo LIKE '2024%'
+GROUP BY me.Mod_Estudio
+ORDER BY Total_Inscripciones DESC
+
+
+-- 5. ¿Cuál es la carrera con mayor cantidad de prospectos en el periodo 2025-1?
+SELECT TOP 1
+    c.Carrera,
+    COUNT(DISTINCT p.id_Prospecto) as Total_Prospectos,
+    CAST(COUNT(DISTINCT p.id_Prospecto) * 100.0 / 
+        (SELECT COUNT(DISTINCT p2.id_Prospecto) 
+         FROM G1.PROSPECTOS p2
+         JOIN G1.INTERES int2 ON p2.id_Prospecto = int2.Id_Prospecto
+         JOIN G1.PERIODOS per2 ON int2.Id_Periodo = per2.id_periodo
+         WHERE per2.Periodo = '2025-1') AS DECIMAL(10,2)) as Porcentaje
+FROM G1.PROSPECTOS p
+JOIN G1.INTERES its ON p.id_Prospecto = its.Id_Prospecto
+JOIN G1.CARRERAS c ON its.Id_Carrera = c.Id_Carrera
+JOIN G1.PERIODOS per ON its.Id_Periodo = per.id_periodo
+WHERE per.Periodo = '2025-1'
+GROUP BY c.Carrera
+ORDER BY Total_Prospectos DESC
+
+
+-- 6. ¿Cuál es el tiempo promedio en días que tarda un prospecto en decidir su inscripción en el año 2024?
+SELECT 
+    CAST(AVG(DATEDIFF(DAY, its.Id_Prospecto, i.Fecha_Inscripcion)) AS DECIMAL(10,1)) as Promedio_Dias,
+    MIN(DATEDIFF(DAY, its.Id_Prospecto, i.Fecha_Inscripcion)) as Minimo_Dias,
+    MAX(DATEDIFF(DAY, its.Id_Prospecto, i.Fecha_Inscripcion)) as Maximo_Dias
+FROM G1.INSCRIPCIONES i
+JOIN G1.INTERES its ON i.Id_interes = its.Id_Interes
+JOIN G1.PERIODOS p ON its.Id_Periodo = p.id_periodo
+WHERE p.Periodo LIKE '2024%'
+
+
+-- 7. ¿Cuál es la cantidad de inscripciones y porcentaje de participacion por edad en el año 2024?
+WITH EdadProspectos AS (
     SELECT 
-        DATEDIFF(YEAR, p.Fecha_Nacimiento, i.Fecha_Inscripción) as Edad,
-        COUNT(*) as CantidadInscritos,
-        COUNT(*) * 100.0 / SUM(COUNT(*)) OVER() as PorcentajeParticipacion
+        DATEDIFF(YEAR, p.Fecha_Nacimiento, i.Fecha_Inscripcion) as Edad,
+        i.Id_Inscripcion
     FROM G1.INSCRIPCIONES i
     JOIN G1.INTERES int ON i.Id_interes = int.Id_Interes
     JOIN G1.PROSPECTOS p ON int.Id_Prospecto = p.id_Prospecto
-    WHERE YEAR(i.Fecha_Inscripción) = 2024
-    GROUP BY DATEDIFF(YEAR, p.Fecha_Nacimiento, i.Fecha_Inscripción)
+    JOIN G1.PERIODOS per ON int.Id_Periodo = per.id_periodo
+    WHERE per.Periodo LIKE '2024%'
 )
 SELECT 
-    Edad,
-    CantidadInscritos,
-    CAST(PorcentajeParticipacion as decimal(5,2)) as PorcentajeParticipacion
-FROM EdadInscritos
-ORDER BY Edad;
+    CASE 
+        WHEN Edad < 18 THEN 'Menor de 18'
+        WHEN Edad BETWEEN 18 AND 20 THEN '18-20'
+        WHEN Edad BETWEEN 21 AND 25 THEN '21-25'
+        WHEN Edad BETWEEN 26 AND 30 THEN '26-30'
+        ELSE 'Mayor de 30'
+    END as Rango_Edad,
+    COUNT(*) as Total_Inscripciones,
+    CAST(COUNT(*) * 100.0 / SUM(COUNT(*)) OVER() AS DECIMAL(10,2)) as Porcentaje
+FROM EdadProspectos
+GROUP BY 
+    CASE 
+        WHEN Edad < 18 THEN 'Menor de 18'
+        WHEN Edad BETWEEN 18 AND 20 THEN '18-20'
+        WHEN Edad BETWEEN 21 AND 25 THEN '21-25'
+        WHEN Edad BETWEEN 26 AND 30 THEN '26-30'
+        ELSE 'Mayor de 30'
+    END
+ORDER BY 1
 
--- 8. Cantidad de inscritos y porcentaje de participacion por departamento en los periodos 2024-1, 2024-2 y 2025-1
+
+-- 8. ¿Cual es la cantidad de inscripciones y porcentaje de participacion por departamento en los periodos 2024-1, 2024-2 y 2025-1?
 WITH InscritosDepartamento AS (
     SELECT 
         p.Departamento,
@@ -100,7 +161,8 @@ SELECT
 FROM InscritosDepartamento
 ORDER BY Periodo, PorcentajeParticipacion DESC;
 
--- 9. Cantidad de inscritos y porcentaje de participación por género en el periodo 2024-1
+
+-- 9. ¿Cuál es la cantidad de inscripciones y porcentaje de participación por género en el periodo 2024-1?
 SELECT 
     p.Genero,
     COUNT(*) as CantidadInscritos,
@@ -113,13 +175,20 @@ WHERE pe.Periodo = '2024-1'
 GROUP BY p.Genero
 ORDER BY CantidadInscritos DESC;
 
--- 10. Interes que tiene la mayor cantidad de inscritos en el año 2024
-SELECT TOP 3
+
+-- 10. ¿Cuál es el interes que tiene la mayor cantidad de inscripciones en el año 2024?
+SELECT TOP 1
     ni.Nivel_Interes,
-    COUNT(*) as CantidadInscritos
+    COUNT(i.Id_Inscripcion) as Total_Inscripciones,
+    CAST(COUNT(i.Id_Inscripcion) * 100.0 / 
+        (SELECT COUNT(*) FROM G1.INSCRIPCIONES i2 
+         JOIN G1.INTERES int2 ON i2.Id_interes = int2.Id_Interes
+         JOIN G1.PERIODOS p2 ON int2.Id_Periodo = p2.id_periodo
+         WHERE p2.Periodo LIKE '2024%') AS DECIMAL(10,2)) as Porcentaje
 FROM G1.INSCRIPCIONES i
 JOIN G1.INTERES int ON i.Id_interes = int.Id_Interes
 JOIN G1.NIVEL_INTERES ni ON int.Id_Nivel_Interes = ni.id_Nivel_Interes
-WHERE YEAR(i.Fecha_Inscripción) = 2024
+JOIN G1.PERIODOS p ON int.Id_Periodo = p.id_periodo
+WHERE p.Periodo LIKE '2024%'
 GROUP BY ni.Nivel_Interes
-ORDER BY CantidadInscritos DESC;
+ORDER BY Total_Inscripciones DESC
