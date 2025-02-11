@@ -1,6 +1,16 @@
+GRUPO 1:
+
+Área de Admisión de un Centro Educativo Superior
+
+El área de admisión se dedica al reclutamiento de nuevos prospectos para el proceso de admisión e inserción al Centro Educativo Superior, en la cual se registran los diferentes intereses de los prospectos, asimismo las diferentes inscripciones para el ingreso a la institución. Los prospectos inician el proceso de inscripción luego de definir a que carrera van a postular.
+
 Integrantes:
 
 Rubén Alfredo Llosa Chaqui
 Yhilda Mirella Gil Chavez
 Jose Antonio Achancaray Ramirez
 Patricia Janeth Bendezú Santana
+
+GITHUB:
+
+https://github.com/PatrciaBendezu/Gestion_Datos_SQL
