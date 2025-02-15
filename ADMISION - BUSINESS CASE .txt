@@ -1,16 +1,111 @@
+--******************************************************
 GRUPO 1:
-
-Área de Admisión de un Centro Educativo Superior
-
-El área de admisión se dedica al reclutamiento de nuevos prospectos para el proceso de admisión e inserción al Centro Educativo Superior, en la cual se registran los diferentes intereses de los prospectos, asimismo las diferentes inscripciones para el ingreso a la institución. Los prospectos inician el proceso de inscripción luego de definir a que carrera van a postular.
+--******************************************************
 
 Integrantes:
 
-Rubén Alfredo Llosa Chaqui
-Yhilda Mirella Gil Chavez
-Jose Antonio Achancaray Ramirez
-Patricia Janeth Bendezú Santana
+Rubén Alfredo Llosa Chaqui 25%
+Yhilda Mirella Gil Chavez 25%
+Jose Antonio Achancaray Ramirez 23%
+Patricia Janeth Bendezú Santana 27%
 
 GITHUB:
 
 https://github.com/PatrciaBendezu/Gestion_Datos_SQL
+
+
+--******************************************************
+--Área de Admisión de un Centro Educativo Superior
+--******************************************************
+
+El área de admisión se dedica al reclutamiento de nuevos prospectos para el proceso de admisión e inserción al Centro Educativo Superior, en la cual se registran los diferentes intereses de los prospectos, asimismo las diferentes inscripciones para el ingreso a la institución. Los prospectos inician el proceso de inscripción luego de definir a que carrera van a postular.
+
+https://docs.google.com/spreadsheets/d/1VsyjJsYHq70RzHSF2CO221XaYLvFMLHHDv7NDyY6DPQ/edit?pli=1&gid=701831293#gid=701831293
+
+--******************************************************
+--KPQS
+--******************************************************
+
+1. ¿Cual es el crecimiento interanual de inscripciones entre periodos 2024-1 y 2025-1?
+2. ¿Qué porcentaje de prospectos no completan las inscripciones en el periodo 2024-1?
+3. ¿Cuál es el top 3 de sedes que tiene la mayor cantidad de inscripciones en el año 2024?
+4. ¿Cuál es la cantidad de inscripciones y su porcentaje de participacion segun modalidad de estudios en el año 2024?
+5. ¿Cuál es la cantidad de inscripciones y su porcentaje de participacion segun carrera en el periodo 2025-1?
+6. ¿Cuál es el tiempo promedio en días que tarda un prospecto en decidir su inscripción en el año 2024?
+7. ¿Cuál es la cantidad de inscripciones y porcentaje de participacion por edad en el año 2024?
+8. ¿Cual es la cantidad de inscripciones y porcentaje de participacion por departamento en los periodos 2024-1, 2024-2 y 2025-1?
+9. ¿Cuál es la cantidad de inscripciones y porcentaje de participación por género en el periodo 2024-1?
+10. ¿Cuál es la cantidad de inscripciones y su porcentaje de participacion segun nivel de interes en el año 2024?
+
+
+--******************************************************
+--KPIS
+--******************************************************
+
+1. Tasa de Conversión de Prospectos a Inscritos
+
+Mide la efectividad del proceso de captación
+Permite identificar qué periodos tienen mejor conversión
+Ayuda a establecer metas realistas de captación
+
+
+2. Efectividad de Modalidades de Admisión
+
+Identifica qué modalidades tienen mayor tasa de éxito
+Permite optimizar recursos en las modalidades más efectivas
+Ayuda a mejorar procesos en modalidades con bajo rendimiento
+
+
+3. Análisis de Demanda por Carrera y Sede
+
+Muestra las carreras más populares por sede
+Ayuda en la planificación de recursos y aulas
+Permite identificar oportunidades de crecimiento
+
+
+4. Análisis Financiero de Inscripciones
+
+Monitorea los ingresos mensuales
+Controla la efectividad de la política de descuentos
+Seguimiento de la morosidad
+
+
+5. Eficiencia del Proceso de Inscripción
+
+Mide la velocidad del proceso completo
+Identifica cuellos de botella
+Ayuda a optimizar tiempos de respuesta
+
+6. Distribución Geográfica de Prospectos
+
+Identifica las regiones con mayor demanda
+Permite focalizar estrategias de marketing por región
+Ayuda a planificar expansiones territoriales
+
+
+7. Rendimiento por Turnos y Secciones
+
+Evalúa la efectividad de diferentes horarios
+Identifica secciones con mejor desempeño
+Ayuda en la asignación óptima de recursos
+
+
+8. Análisis de Nivel de Interés y Conversión
+
+Valida la efectividad de la clasificación de prospectos
+Permite priorizar esfuerzos en grupos más prometedores
+Ayuda a refinar el proceso de calificación de leads
+
+
+9. Efectividad de Modalidad de Estudios
+
+Compara el rendimiento entre modalidades (presencial, virtual, etc.)
+Analiza preferencias de los estudiantes
+Evalúa la rentabilidad por modalidad
+
+
+10. Análisis de Perfil Demográfico
+
+Identifica perfiles de éxito
+Permite personalizar estrategias por segmento
+Ayuda a entender preferencias por edad/género
