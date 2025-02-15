@@ -1,5 +1,8 @@
 USE UCDATASCIENCE
 
+--******************************************************
+--******************************************************
+
 -- 1. ¿Cual es el crecimiento interanual de inscripciones entre periodos 2024-1 y 2025-1?
 WITH InscripcionesPeriodo AS (
     SELECT 
@@ -21,10 +24,10 @@ SELECT
     ) as Crecimiento_Porcentual
 
 
--- 2. ¿Qué porcentaje de prospectos no completan las nscripciones en el periodo 2024-1?
+-- 2. ¿Qué porcentaje de prospectos no completan las inscripciones en el periodo 2024-1?
 WITH Estadisticas AS (
     SELECT 
-        COUNT(DISTINCT p.id_Prospecto) as TotalProspectos,
+        COUNT(p.id_Prospecto) as TotalProspectos,
         COUNT(DISTINCT i.Id_Inscripcion) as TotalInscripciones
     FROM G1.PROSPECTOS p
     JOIN G1.INTERES int ON p.id_Prospecto = int.Id_Prospecto
@@ -58,8 +61,8 @@ GROUP BY s.Sede
 ORDER BY Total_Inscripciones DESC
 
 
--- 4. ¿Cuál es la modalidad de estudios que tiene mayor cantidad de inscripciones en el año 2024?
-SELECT TOP 1
+-- 4. ¿Cuál es la cantidad de inscripciones y su porcentaje de participacion segun modalidad de estudios en el año 2024?
+SELECT
     me.Mod_Estudio,
     COUNT(i.Id_Inscripcion) as Total_Inscripciones,
     CAST(COUNT(i.Id_Inscripcion) * 100.0 / 
@@ -76,8 +79,8 @@ GROUP BY me.Mod_Estudio
 ORDER BY Total_Inscripciones DESC
 
 
--- 5. ¿Cuál es la carrera con mayor cantidad de prospectos en el periodo 2025-1?
-SELECT TOP 1
+-- 5. ¿Cuál es la cantidad de inscripciones y su porcentaje de participacion segun carrera en el periodo 2025-1?
+SELECT
     c.Carrera,
     COUNT(DISTINCT p.id_Prospecto) as Total_Prospectos,
     CAST(COUNT(DISTINCT p.id_Prospecto) * 100.0 / 
@@ -97,10 +100,11 @@ ORDER BY Total_Prospectos DESC
 
 -- 6. ¿Cuál es el tiempo promedio en días que tarda un prospecto en decidir su inscripción en el año 2024?
 SELECT 
-    CAST(AVG(DATEDIFF(DAY, its.Id_Prospecto, i.Fecha_Inscripcion)) AS DECIMAL(10,1)) as Promedio_Dias,
-    MIN(DATEDIFF(DAY, its.Id_Prospecto, i.Fecha_Inscripcion)) as Minimo_Dias,
-    MAX(DATEDIFF(DAY, its.Id_Prospecto, i.Fecha_Inscripcion)) as Maximo_Dias
+    CAST(AVG(DATEDIFF(DAY, i.Fecha_Inscripcion, pg.Fecha_Pago)) AS DECIMAL(10,1)) as Promedio_Dias,
+    MIN(DATEDIFF(DAY, i.Fecha_Inscripcion, pg.Fecha_Pago)) as Minimo_Dias,
+    MAX(DATEDIFF(DAY, i.Fecha_Inscripcion, pg.Fecha_Pago)) as Maximo_Dias
 FROM G1.INSCRIPCIONES i
+JOIN G1.PAGOS pg ON i.Id_Inscripcion = pg.Id_Inscripcion
 JOIN G1.INTERES its ON i.Id_interes = its.Id_Interes
 JOIN G1.PERIODOS p ON its.Id_Periodo = p.id_periodo
 WHERE p.Periodo LIKE '2024%'
@@ -109,13 +113,13 @@ WHERE p.Periodo LIKE '2024%'
 -- 7. ¿Cuál es la cantidad de inscripciones y porcentaje de participacion por edad en el año 2024?
 WITH EdadProspectos AS (
     SELECT 
-        DATEDIFF(YEAR, p.Fecha_Nacimiento, i.Fecha_Inscripcion) as Edad,
+        DATEDIFF(YEAR, p.Fecha_Nacimiento, GETDATE()) as Edad,
         i.Id_Inscripcion
     FROM G1.INSCRIPCIONES i
     JOIN G1.INTERES int ON i.Id_interes = int.Id_Interes
     JOIN G1.PROSPECTOS p ON int.Id_Prospecto = p.id_Prospecto
     JOIN G1.PERIODOS per ON int.Id_Periodo = per.id_periodo
-    WHERE per.Periodo LIKE '2024%'
+    WHERE per.Periodo LIKE '2025%'
 )
 SELECT 
     CASE 
@@ -176,8 +180,8 @@ GROUP BY p.Genero
 ORDER BY CantidadInscritos DESC;
 
 
--- 10. ¿Cuál es el interes que tiene la mayor cantidad de inscripciones en el año 2024?
-SELECT TOP 1
+-- 10. ¿Cuál es la cantidad de inscripciones y su porcentaje de participacion segun nivel de interes en el año 2024?
+SELECT
     ni.Nivel_Interes,
     COUNT(i.Id_Inscripcion) as Total_Inscripciones,
     CAST(COUNT(i.Id_Inscripcion) * 100.0 / 
